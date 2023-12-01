@@ -10,7 +10,7 @@ fun main() {
 
     fun part2(input: List<String>): Int {
         val nbrSpelled = listOf("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
-        val reg = Regex("^(one|two|three|four|five|six|seven|eight|nine|[1-9]).*$")
+        val reg = Regex("(?=(one|two|three|four|five|six|seven|eight|nine|[1-9]))")
 
         fun transform(s: String) = if (s.length == 1) {
             s
@@ -19,10 +19,8 @@ fun main() {
         }
 
         return input.asSequence().map { i ->
-            val a = i.indices.mapNotNull {
-                reg.find(i.substring(it))?.groupValues?.get(1)
-            }
-            transform(a.first()) + transform(a.last())
+            val captures = reg.findAll(i).flatMap { it.groupValues.drop(1) }
+            transform(captures.first()) + transform(captures.last())
         }.map { it.toInt() }.sum()
     }
 
