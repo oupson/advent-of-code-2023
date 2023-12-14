@@ -81,7 +81,18 @@ fun main() {
         return part(input) { pattern -> findColumn(pattern) + findRow(pattern) }
     }
 
-    fun canBeFixed(lineOne: List<Boolean>, lineTwo: List<Boolean>): Boolean {
+    fun canColumnBeFixed(pattern: List<List<Boolean>>, columnOne: Int, columnTwo: Int): Boolean {
+        var diff = 0
+        for (i in pattern.indices) {
+            if (pattern[i][columnOne] != pattern[i][columnTwo]) {
+                diff += 1
+            }
+        }
+
+        return diff == 1
+    }
+
+    fun canRowBeFixed(lineOne: List<Boolean>, lineTwo: List<Boolean>): Boolean {
         var diff = 0
         for (i in lineOne.indices) {
             if (lineOne[i] != lineTwo[i]) {
@@ -92,31 +103,57 @@ fun main() {
         return diff == 1
     }
 
-    fun part2(input: List<String>): Long {
-        return part(input) { pattern ->
-            a@ for (l in 1 until pattern.size) {
-                var fixed = false
-                var i = 0
+    fun fixRow(pattern : List<List<Boolean>>) : Long{
+        a@ for (l in 1 until pattern.size) {
+            var fixed = false
+            var i = 0
 
-                while (l - i - 1 >= 0 && l + i < pattern.size) {
-                    if (pattern[l - i - 1] != pattern[l + i]) {
-                        if (canBeFixed(pattern[l - i - 1], pattern[l + i]) && !fixed) {
-                            fixed = true
-                        } else {
-                            continue@a
-                        }
+            while (l - i - 1 >= 0 && l + i < pattern.size) {
+                if (pattern[l - i - 1] != pattern[l + i]) {
+                    if (canRowBeFixed(pattern[l - i - 1], pattern[l + i]) && !fixed) {
+                        fixed = true
+                    } else {
+                        continue@a
                     }
-                    i += 1
                 }
-
-                if (fixed) {
-                    return@part l * 100L
-                }
+                i += 1
             }
 
+            if (fixed) {
+                return l * 100L
+            }
+        }
 
-            printInput(pattern)
-            0L
+        return 0L
+    }
+
+    fun fixColumn(pattern : List<List<Boolean>>):Long {
+        a@ for (c in 1 until pattern[0].size) {
+            var fixed = false
+            var i = 0
+
+            while (c - i - 1 >= 0 && c + i < pattern[0].size) {
+                if (!columnSimilar(pattern, c - i -1, c + i)) {
+                    if (canColumnBeFixed(pattern, c - i - 1, c + i) && !fixed) {
+                        fixed = true
+                    } else {
+                        continue@a
+                    }
+                }
+                i += 1
+            }
+
+            if (fixed) {
+                return c.toLong()
+            }
+        }
+
+        return 0L
+    }
+
+    fun part2(input: List<String>): Long {
+        return part(input) { pattern ->
+            fixRow(pattern) + fixColumn(pattern)
         }
     }
 
@@ -129,5 +166,8 @@ fun main() {
 
     check(part2(testInput) == 400L)
 
+
+    check(part2(input) < 48400L) { "inf" }
+    check(part2(input) > 42857L) { "sup" }
     part2(input).println()
 }
